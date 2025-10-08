@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>流星烟花·万家灯火</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: linear-gradient(to bottom, 
+                #0a0a2e 0%, 
+                #16213e 30%, 
+                #1a1a3a 60%, 
+                #2d1b69 100%);
+            font-family: 'Arial', sans-serif;
+            cursor: crosshair;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 星空背景 */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* 城市轮廓 */
+        .cityscape {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, #1a1a1a 0%, transparent 100%);
+        }
+
+        .building {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(to top, #2a2a2a, #1a1a1a);
+            border-radius: 2px 2px 0 0;
+        }
+
+        .window {
+            position: absolute;
+            background: #ffeb3b;
+            border-radius: 1px;
+            animation: windowFlicker 4s infinite;
+        }
+
+        @keyframes windowFlicker {
+            0%, 100% { opacity: 0.8; box-shadow: 0 0 5px #ffeb3b; }
+            25% { opacity: 1; box-shadow: 0 0 10px #ffeb3b; }
+            50% { opacity: 0.6; box-shadow: 0 0 3px #ffeb3b; }
+            75% { opacity: 0.9; box-shadow: 0 0 8px #ffeb3b; }
+        }
+
+        /* 流星 */
+        .meteor {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(45deg, #ffffff, #87ceeb, #4169e1);
+            border-radius: 50%;
+            opacity: 0.9;
+            z-index: 999;
+            box-shadow: 
+                0 0 20px #ffffff,
+                0 0 40px #87ceeb,
+                0 0 60px #4169e1;
+            filter: blur(0.5px);
+        }
+
+        .meteor::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 200px;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.8) 0%, 
+                rgba(135,206,235,0.6) 30%, 
+                rgba(65,105,225,0.4) 60%, 
+                transparent 100%);
+            transform: translateY(-50%);
+            border-radius: 50px;
+            filter: blur(1px);
+        }
+        
+        .meteor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,1) 0%, 
+                rgba(135,206,235,0.8) 50%, 
+                transparent 100%);
+            transform: translateY(-50%);
+            border-radius: 50px;
+        }
+
+        /* 烟花 */
+        .firework {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .firework-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            filter: blur(0.5px);
+        }
+        
+        .firework-particle::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            background: inherit;
+            opacity: 0.3;
+            filter: blur(2px);
+        }
+
+        /* 控制面板 */
+        .controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            color: white;
+            backdrop-filter: blur(10px);
+            max-width: 200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls h3 {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .control-button {
+            display: block;
+            width: 100%;
+            margin: 8px 0;
+            padding: 12px 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .control-button:hover, .control-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #7c8cff, #8a5cb8);
+        }
+
+        .info {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            color: white;
+            text-align: right;
+            font-size: 12px;
+            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            max-width: 200px;
+            line-height: 1.4;
+        }
+
+        /* 月亮 */
+        .moon {
+            position: absolute;
+            top: 10%;
+            right: 15%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #fff 0%, #f0f0f0 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            animation: moonGlow 6s ease-in-out infinite;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(255, 255, 255, 0.5); }
+        }
+
+        /* 云朵 */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            animation: cloudMove 20s linear infinite;
+        }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(-100px); }
+            100% { transform: translateX(calc(100vw + 100px)); }
+        }
+
+        /* 粒子效果 */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .controls {
+                top: 5px;
+                left: 5px;
+                padding: 12px;
+                max-width: 160px;
+                border-radius: 12px;
+            }
+            
+            .controls h3 {
+                font-size: 1em;
+                margin-bottom: 12px;
+            }
+            
+            .control-button {
+                padding: 10px 12px;
+                font-size: 0.8em;
+                margin: 6px 0;
+            }
+            
+            .moon {
+                width: 50px;
+                height: 50px;
+                top: 8%;
+                right: 10%;
+            }
+            
+            .info {
+                bottom: 10px;
+                right: 10px;
+                font-size: 11px;
+                padding: 8px 12px;
+                max-width: 160px;
+            }
+            
+            .cityscape {
+                height: 35%;
+            }
+            
+            .building {
+                opacity: 0.9;
+            }
+            
+            .window {
+                animation-duration: 3s;
+            }
+            
+            /* 优化粒子效果性能 */
+            @keyframes gradientExpand {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sparkle {
+                0% { 
+                    transform: scale(0) rotate(0deg);
+                    opacity: 1;
+                }
+                50% { 
+                    transform: scale(1.2) rotate(180deg);
+                    opacity: 0.8;
+                }
+                100% { 
+                    transform: scale(0) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+            
+            .sparkle {
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+                border-radius: 50%;
+                pointer-events: none;
+                animation: sparkle 1s ease-out forwards;
+                z-index: 1001;
+            }
+            
+            .sparkle::before {
+                content: '';
+                position: absolute;
+                top: -1px;
+                left: 50%;
+                width: 1px;
+                height: 6px;
+                background: linear-gradient(to bottom, #ffffff, transparent);
+                transform: translateX(-50%);
+            }
+            
+            .sparkle::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: -1px;
+                width: 6px;
+                height: 1px;
+                background: linear-gradient(to right, #ffffff, transparent);
+                transform: translateY(-50%);
+            }
+            .firework-particle {
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 1000;
+                filter: blur(0.5px);
+            }
+            
+            .firework-particle::before {
+                content: '';
+                position: absolute;
+                top: -4px;
+                left: -4px;
+                right: -4px;
+                bottom: -4px;
+                border-radius: 50%;
+                background: inherit;
+                opacity: 0.3;
+                filter: blur(2px);
+            }
+            
+            .meteor::before {
+                width: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                top: 3px;
+                left: 3px;
+                padding: 10px;
+                max-width: 140px;
+            }
+            
+            .controls h3 {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+            
+            .control-button {
+                padding: 8px 10px;
+                font-size: 0.75em;
+                margin: 5px 0;
+            }
+            
+            .info {
+                bottom: 8px;
+                right: 8px;
+                font-size: 10px;
+                padding: 6px 10px;
+                max-width: 140px;
+            }
+            
+            .moon {
+                width: 40px;
+                height: 40px;
+            }
+            
+            /* 进一步优化小屏幕性能 */
+            .star {
+                animation-duration: 4s;
+            }
+            
+            .firework-particle {
+                width: 2px;
+                height: 2px;
+            }
+            
+            .meteor::before {
+                width: 40px;
+            }
+        }
+
+        /* 横屏适配 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .controls {
+                top: 2px;
+                left: 2px;
+                padding: 8px;
+                max-width: 120px;
+            }
+            
+            .controls h3 {
+                font-size: 0.8em;
+                margin-bottom: 8px;
+            }
+            
+            .control-button {
+                padding: 6px 8px;
+                font-size: 0.7em;
+                margin: 4px 0;
+            }
+            
+            .info {
+                bottom: 5px;
+                right: 5px;
+                font-size: 9px;
+                padding: 5px 8px;
+                max-width: 120px;
+            }
+            
+            .cityscape {
+                height: 30%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 星空 -->
+        <div class="stars" id="stars"></div>
+        
+        <!-- 月亮 -->
+        <div class="moon"></div>
+        
+        <!-- 云朵 -->
+        <div class="cloud" style="top: 20%; width: 100px; height: 40px; animation-delay: 0s;"></div>
+        <div class="cloud" style="top: 35%; width: 80px; height: 30px; animation-delay: -10s;"></div>
+        <div class="cloud" style="top: 15%; width: 120px; height: 50px; animation-delay: -5s;"></div>
+        
+        <!-- 城市轮廓 -->
+        <div class="cityscape" id="cityscape"></div>
+        
+        <!-- 控制面板 -->
+        <div class="controls">
+            <h3>🌟 夜空控制台</h3>
+            <button class="control-button" onclick="createMeteorShower()">流星雨 ☄️</button>
+            <button class="control-button" onclick="createMassiveMeteorShower()">超级流星雨 🌠</button>
+            <button class="control-button" onclick="launchFirework()">放烟花 🎆</button>
+            <button class="control-button" onclick="toggleLights()">切换灯光 💡</button>
+            <button class="control-button" onclick="createRandomEffect()">随机效果 ✨</button>
+        </div>
+        
+        <!-- 信息面板 -->
+        <div class="info">
+            <div>🎭 罗学长邀请你观看</div>
+            <div>📱 手机操作指南：</div>
+            <div>• 单击屏幕放烟花</div>
+            <div>• 双击屏幕创建流星雨</div>
+            <div>• 长按屏幕切换灯光</div>
+            <div>• 点击按钮使用各种效果</div>
+            <div>享受这个唯美的夜晚 🌙</div>
+        </div>
+    </div>
+
+    <script>
+        class NightSkyEffect {
+            constructor() {
+                this.container = document.querySelector('.container');
+                this.meteors = [];
+                this.fireworks = [];
+                this.particles = [];
+                this.lightsOn = true;
+                this.audioContext = null;
+                
+                this.init();
+                this.bindEvents();
+                this.startAnimationLoop();
+            }
+
+            init() {
+                this.createStars();
+                this.createCityscape();
+                this.createAudioContext();
+                
+                // 自动效果
+                setInterval(() => this.createRandomMeteor(), 3000);
+                setInterval(() => this.createRandomFirework(), 5000);
+            }
+
+            createAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // 色彩渐变效果
+            createColorGradient(x, y) {
+                const gradient = document.createElement('div');
+                gradient.style.position = 'absolute';
+                gradient.style.left = (x - 50) + 'px';
+                gradient.style.top = (y - 50) + 'px';
+                gradient.style.width = '100px';
+                gradient.style.height = '100px';
+                gradient.style.borderRadius = '50%';
+                gradient.style.background = `radial-gradient(circle, 
+                    rgba(255, 255, 255, 0.8) 0%, 
+                    rgba(255, 200, 100, 0.6) 20%, 
+                    rgba(255, 100, 150, 0.4) 40%, 
+                    rgba(100, 150, 255, 0.2) 60%, 
+                    transparent 80%)`;
+                gradient.style.pointerEvents = 'none';
+                gradient.style.zIndex = '999';
+                gradient.style.animation = 'gradientExpand 1.5s ease-out forwards';
+                this.container.appendChild(gradient);
+                
+                setTimeout(() => {
+                    if (gradient.parentNode) {
+                        gradient.remove();
+                    }
+                }, 1500);
+            }
+
+            playSound(frequency, duration = 0.1, type = 'sine', volume = 0.1) {
+                if (!this.audioContext) return;
+                
+                try {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                    oscillator.type = type;
+                    
+                    // 增强音效包络
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(volume * 0.5, this.audioContext.currentTime + duration * 0.3);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                } catch (e) {
+                    console.log('Audio playback failed:', e);
+                }
+            }
+
+            createStars() {
+                const starsContainer = document.getElementById('stars');
+                // 根据屏幕大小调整星星数量
+                const isMobile = window.innerWidth <= 768;
+                const starCount = isMobile ? 100 : 200;
+                
+                for (let i = 0; i < starCount; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 70 + '%';
+                    star.style.width = Math.random() * (isMobile ? 2 : 3) + 1 + 'px';
+                    star.style.height = star.style.width;
+                    star.style.animationDelay = Math.random() * 3 + 's';
+                    star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    starsContainer.appendChild(star);
+                }
+            }
+
+            createCityscape() {
+                const cityscape = document.getElementById('cityscape');
+                const buildingCount = 15;
+                
+                for (let i = 0; i < buildingCount; i++) {
+                    const building = document.createElement('div');
+                    building.className = 'building';
+                    
+                    const width = Math.random() * 80 + 40;
+                    const height = Math.random() * 200 + 100;
+                    
+                    building.style.width = width + 'px';
+                    building.style.height = height + 'px';
+                    building.style.left = (i * (100 / buildingCount)) + '%';
+                    
+                    // 添加窗户
+                    this.addWindows(building, width, height);
+                    
+                    cityscape.appendChild(building);
+                }
+            }
+
+            addWindows(building, buildingWidth, buildingHeight) {
+                const windowsPerRow = Math.floor(buildingWidth / 15);
+                const rows = Math.floor(buildingHeight / 20);
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < windowsPerRow; col++) {
+                        if (Math.random() > 0.3) { // 70%的窗户有灯光
+                            const window = document.createElement('div');
+                            window.className = 'window';
+                            window.style.width = '8px';
+                            window.style.height = '12px';
+                            window.style.left = (col * 15 + 5) + 'px';
+                            window.style.bottom = (row * 20 + 5) + 'px';
+                            window.style.animationDelay = Math.random() * 4 + 's';
+                            window.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                            building.appendChild(window);
+                        }
+                    }
+                }
+            }
+
+            createMeteor(initialX = null, initialY = null) {
+                const meteor = document.createElement('div');
+                meteor.className = 'meteor';
+                
+                // 增大流星尺寸
+                const size = Math.random() * 4 + 6; // 6-10px
+                meteor.style.width = size + 'px';
+                meteor.style.height = size + 'px';
+                
+                // 随机起始位置（从屏幕上方和左侧）
+                const startX = initialX || Math.random() * window.innerWidth;
+                const startY = initialY || -50;
+                
+                meteor.style.left = startX + 'px';
+                meteor.style.top = startY + 'px';
+                
+                // 增强发光效果
+                const glowColors = ['#ffffff', '#87ceeb', '#4169e1', '#00bfff'];
+                const primaryColor = glowColors[Math.floor(Math.random() * glowColors.length)];
+                meteor.style.boxShadow = `
+                    0 0 30px ${primaryColor},
+                    0 0 60px ${primaryColor},
+                    0 0 90px ${primaryColor},
+                    0 0 120px rgba(255,255,255,0.5)
+                `;
+                
+                this.container.appendChild(meteor);
+                
+                // 增强音效系统
+                const sounds = [
+                    { frequency: 800, duration: 0.1, volume: 0.3 },
+                    { frequency: 1200, duration: 0.15, volume: 0.2 },
+                    { frequency: 600, duration: 0.08, volume: 0.25 },
+                    { frequency: 1500, duration: 0.12, volume: 0.15 }
+                ];
+                
+                sounds.forEach((sound, index) => {
+                    setTimeout(() => {
+                        this.playSound(sound.frequency, sound.duration, sound.volume);
+                    }, index * 20);
+                });
+                
+                // 流星运动动画
+                const endX = startX + (Math.random() * 400 + 300);
+                const endY = window.innerHeight + 100;
+                const duration = Math.random() * 2000 + 2000; // 2-4秒
+                
+                meteor.style.transition = `all ${duration}ms linear`;
+                meteor.style.transform = `translate(${endX - startX}px, ${endY - startY}px) rotate(45deg)`;
+                meteor.style.opacity = '0';
+                
+                // 创建流星轨迹粒子效果
+                this.createMeteorTrail(startX, startY, endX, endY, duration, primaryColor);
+                
+                setTimeout(() => {
+                    meteor.remove();
+                }, duration);
+            }
+
+            createMeteorShower() {
+                const meteorCount = 25; // 增加流星数量
+                const duration = 3000; // 流星雨持续时间
+                
+                // 创建密集的流星雨效果
+                for (let i = 0; i < meteorCount; i++) {
+                    setTimeout(() => {
+                        // 随机起始位置，让流星从不同位置开始
+                        const startX = Math.random() * (window.innerWidth + 200) - 100;
+                        const startY = Math.random() * 100 - 150; // 从更高的位置开始
+                        this.createMeteor(startX, startY);
+                    }, Math.random() * duration); // 随机时间间隔，更自然
+                }
+                
+                // 添加第二波流星雨，增加密度
+                setTimeout(() => {
+                    for (let i = 0; i < 15; i++) {
+                        setTimeout(() => {
+                            const startX = Math.random() * (window.innerWidth + 200) - 100;
+                            const startY = Math.random() * 100 - 200;
+                            this.createMeteor(startX, startY);
+                        }, Math.random() * 2000);
+                    }
+                }, 1000);
+            }
+
+            // 性能优化：限制同时存在的效果数量
+            createFirework(x, y) {
+                // 限制同时存在的粒子数量
+                if (this.particles.length > 300) {
+                    return;
+                }
+                
+                const colors = [
+                    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7',
+                    '#dda0dd', '#98d8c8', '#f7dc6f', '#bb8fce', '#85c1e9',
+                    '#ff9ff3', '#54a0ff', '#5f27cd', '#00d2d3', '#ff9f43'
+                ];
+                
+                const particleCount = window.innerWidth < 768 ? 35 : 50;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 创建爆炸冲击波效果
+                this.createShockwave(x, y, color);
+                
+                // 添加色彩渐变效果
+                this.createColorGradient(x, y);
+                
+                // 增强烟花爆炸音效
+                this.playSound(1500, 0.4, 'square', 0.15);
+                setTimeout(() => this.playSound(1000, 0.6, 'sine', 0.12), 80);
+                setTimeout(() => this.playSound(600, 0.4, 'triangle', 0.08), 160);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'firework-particle';
+                    particle.style.background = color;
+                    particle.style.left = x + 'px';
+                    particle.style.top = y + 'px';
+                    particle.style.boxShadow = `
+                        0 0 15px ${color},
+                        0 0 30px ${color},
+                        0 0 45px ${color}
+                    `;
+                    
+                    this.container.appendChild(particle);
+                    
+                    const angle = (i / particleCount) * Math.PI * 2;
+                    const isMobile = window.innerWidth <= 768;
+                    const velocity = Math.random() * (isMobile ? 5 : 8) + 3;
+                    
+                    const particleObj = {
+                        element: particle,
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: 1,
+                        decay: isMobile ? 0.015 : 0.012, // 更慢的衰减，持续更久
+                        color: color
+                    };
+                    
+                    this.particles.push(particleObj);
+                }
+            }
+
+            createRandomFirework() {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight * 0.6;
+                this.createFirework(x, y);
+            }
+
+            createRandomMeteor() {
+                if (Math.random() > 0.7) {
+                    this.createMeteor();
+                }
+            }
+
+            createRandomEffect() {
+                const effects = [
+                    () => this.createMeteorShower(),
+                    () => this.createRandomFirework(),
+                    () => this.createMassiveMeteorShower(), // 新增超级流星雨
+                    () => {
+                        // 连续烟花
+                        for (let i = 0; i < 5; i++) {
+                            setTimeout(() => this.createRandomFirework(), i * 300);
+                        }
+                    },
+                    () => {
+                        for (let i = 0; i < 3; i++) {
+                            setTimeout(() => this.createMeteor(), i * 500);
+                        }
+                    }
+                ];
+                
+                const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+                randomEffect();
+            }
+            
+            // 新增超级流星雨效果
+            createMassiveMeteorShower() {
+                const meteorCount = 50; // 超多流星
+                const duration = 4000;
+                
+                // 第一波：从左上角开始的流星群
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const startX = Math.random() * 300 - 100;
+                        const startY = Math.random() * 150 - 200;
+                        this.createMeteor(startX, startY);
+                    }, Math.random() * 1500);
+                }
+                
+                // 第二波：从中间开始的流星群
+                setTimeout(() => {
+                    for (let i = 0; i < 20; i++) {
+                        setTimeout(() => {
+                            const startX = window.innerWidth * 0.3 + Math.random() * (window.innerWidth * 0.4);
+                            const startY = Math.random() * 100 - 180;
+                            this.createMeteor(startX, startY);
+                        }, Math.random() * 2000);
+                    }
+                }, 800);
+                
+                // 第三波：从右上角开始的流星群
+                setTimeout(() => {
+                    for (let i = 0; i < 15; i++) {
+                        setTimeout(() => {
+                            const startX = window.innerWidth - 200 + Math.random() * 300;
+                            const startY = Math.random() * 120 - 160;
+                            this.createMeteor(startX, startY);
+                        }, Math.random() * 1800);
+                    }
+                }, 1500);
+            }
+
+            toggleLights() {
+                this.lightsOn = !this.lightsOn;
+                const windows = document.querySelectorAll('.window');
+                
+                windows.forEach(window => {
+                    if (this.lightsOn) {
+                        window.style.opacity = Math.random() > 0.3 ? '0.8' : '0';
+                        window.style.animationPlayState = 'running';
+                    } else {
+                        window.style.opacity = '0';
+                        window.style.animationPlayState = 'paused';
+                    }
+                });
+            }
+
+            updateMeteors() {
+                this.meteors = this.meteors.filter(meteor => {
+                    meteor.x += meteor.vx;
+                    meteor.y += meteor.vy;
+                    meteor.life -= meteor.decay;
+                    
+                    meteor.element.style.left = meteor.x + 'px';
+                    meteor.element.style.top = meteor.y + 'px';
+                    meteor.element.style.opacity = meteor.life;
+                    
+                    if (meteor.life <= 0 || meteor.y > window.innerHeight) {
+                        meteor.element.remove();
+                        return false;
+                    }
+                    
+                    return true;
+                });
+            }
+
+            createShockwave(x, y, color) {
+                const shockwave = document.createElement('div');
+                shockwave.style.position = 'absolute';
+                shockwave.style.left = x + 'px';
+                shockwave.style.top = y + 'px';
+                shockwave.style.width = '0px';
+                shockwave.style.height = '0px';
+                shockwave.style.border = `2px solid ${color}`;
+                shockwave.style.borderRadius = '50%';
+                shockwave.style.transform = 'translate(-50%, -50%)';
+                shockwave.style.opacity = '0.8';
+                shockwave.style.pointerEvents = 'none';
+                shockwave.style.zIndex = '999';
+                shockwave.style.boxShadow = `0 0 20px ${color}`;
+                
+                this.container.appendChild(shockwave);
+                
+                // 冲击波动画
+                let size = 0;
+                let opacity = 0.8;
+                const animate = () => {
+                    size += 8;
+                    opacity -= 0.02;
+                    
+                    shockwave.style.width = size + 'px';
+                    shockwave.style.height = size + 'px';
+                    shockwave.style.opacity = opacity;
+                    
+                    if (opacity > 0 && size < 300) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        shockwave.remove();
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            }
+
+            createMeteorTrail(startX, startY, endX, endY, duration, color) {
+                const trailParticles = 15;
+                for (let i = 0; i < trailParticles; i++) {
+                    setTimeout(() => {
+                        const trail = document.createElement('div');
+                        trail.style.position = 'absolute';
+                        trail.style.width = '2px';
+                        trail.style.height = '2px';
+                        trail.style.background = color;
+                        trail.style.borderRadius = '50%';
+                        trail.style.left = startX + 'px';
+                        trail.style.top = startY + 'px';
+                        trail.style.boxShadow = `0 0 10px ${color}`;
+                        trail.style.opacity = '0.8';
+                        trail.style.pointerEvents = 'none';
+                        
+                        this.container.appendChild(trail);
+                        
+                        // 轨迹粒子跟随流星
+                        const progress = i / trailParticles;
+                        const currentX = startX + (endX - startX) * progress;
+                        const currentY = startY + (endY - startY) * progress;
+                        
+                        setTimeout(() => {
+                            trail.style.transition = 'opacity 500ms ease-out';
+                            trail.style.opacity = '0';
+                            setTimeout(() => trail.remove(), 500);
+                        }, duration * progress);
+                    }, i * 100);
+                }
+            }
+
+            updateParticles() {
+                // 性能优化：批量处理DOM操作
+                const fragment = document.createDocumentFragment();
+                let needsUpdate = false;
+                
+                this.particles.forEach(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vy += 0.2; // 重力效果
+                    particle.life -= particle.decay;
+                    
+                    // 批量更新样式
+                    if (particle.life > 0) {
+                        const scale = Math.max(0.3, particle.life);
+                        const opacity = Math.max(0, particle.life);
+                        
+                        // 使用transform3d启用硬件加速
+                        particle.element.style.transform = `translate3d(${particle.x}px, ${particle.y}px, 0) scale(${scale})`;
+                        particle.element.style.opacity = opacity;
+                        
+                        // 减少光晕效果的计算频率
+                        if (Math.random() < 0.3) {
+                            const glowIntensity = particle.life * 45;
+                            particle.element.style.boxShadow = `
+                                0 0 ${glowIntensity}px ${particle.color},
+                                0 0 ${glowIntensity * 0.7}px ${particle.color},
+                                0 0 ${glowIntensity * 0.4}px ${particle.color}
+                            `;
+                        }
+                        
+                        // 减少闪烁粒子的创建频率
+                        if (Math.random() < 0.05 && particle.life > 0.5) {
+                            this.createSparkle(particle.x, particle.y);
+                        }
+                        needsUpdate = true;
+                    }
+                });
+                
+                // 批量移除过期粒子
+                this.particles = this.particles.filter(particle => {
+                    if (particle.life <= 0) {
+                        particle.element.remove();
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            
+            createSparkle(x, y) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                sparkle.style.background = `hsl(${Math.random() * 360}, 100%, 80%)`;
+                this.container.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 1000);
+            }
+
+            bindEvents() {
+                // 点击创建烟花
+                this.container.addEventListener('click', (e) => {
+                    this.createFirework(e.clientX, e.clientY);
+                });
+                
+                // 添加触摸事件支持
+                this.container.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // 防止默认的触摸行为
+                    const touch = e.touches[0];
+                    const rect = this.container.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    
+                    // 触摸创建烟花
+                    this.createFirework(x, y);
+                }, { passive: false });
+
+                // 添加双击事件支持
+                let lastTouchTime = 0;
+                this.container.addEventListener('touchend', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTouchTime;
+                    if (tapLength < 500 && tapLength > 0) {
+                        // 双击触发流星雨
+                        this.createMeteorShower();
+                    }
+                    lastTouchTime = currentTime;
+                });
+
+                // 添加长按事件支持
+                let touchTimer;
+                this.container.addEventListener('touchstart', (e) => {
+                    touchTimer = setTimeout(() => {
+                        // 长按切换灯光
+                        this.toggleLights();
+                    }, 800);
+                });
+
+                this.container.addEventListener('touchend', () => {
+                    clearTimeout(touchTimer);
+                });
+
+                this.container.addEventListener('touchmove', () => {
+                    clearTimeout(touchTimer);
+                });
+                
+                // 键盘控制
+                document.addEventListener('keydown', (e) => {
+                    switch(e.code) {
+                        case 'Space':
+                            e.preventDefault();
+                            this.createMeteorShower();
+                            break;
+                        case 'KeyS':
+                            this.createMassiveMeteorShower(); // S键触发超级流星雨
+                            break;
+                        case 'KeyF':
+                            this.createRandomFirework();
+                            break;
+                        case 'KeyL':
+                            this.toggleLights();
+                            break;
+                        case 'KeyR':
+                            this.createRandomEffect();
+                            break;
+                    }
+                });
+            }
+
+            startAnimationLoop() {
+                const animate = () => {
+                    this.updateMeteors();
+                    this.updateParticles();
+                    requestAnimationFrame(animate);
+                };
+                animate();
+            }
+        }
+
+        // 全局函数
+        function createMeteorShower() {
+            nightSky.createMeteorShower();
+        }
+
+        function createMassiveMeteorShower() {
+            nightSky.createMassiveMeteorShower();
+        }
+
+        function launchFirework() {
+            nightSky.createRandomFirework();
+        }
+
+        function toggleLights() {
+            nightSky.toggleLights();
+        }
+
+        function createRandomEffect() {
+            nightSky.createRandomEffect();
+        }
+
+        // 初始化
+        const nightSky = new NightSkyEffect();
+
+        // 欢迎信息
+        setTimeout(() => {
+            console.log('🌟 欢迎来到流星烟花·万家灯火的世界！');
+            console.log('✨ 点击屏幕放烟花，按空格键创建流星雨');
+            console.log('🎆 快捷键：F-烟花，L-灯光，R-随机效果');
+        }, 1000);
+    </script>
+</body>
+</html>
